@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+#
+# command: Description de la commande
+#
+
+DIR=$(cd `dirname $0` && pwd)
+PROGRAM=`basename $0 .sh`
+
+# Import des fonctions utiles
+source "${DIR}/utils/common.sh" || exit 1
+
+# Configuration (chargement des variables d'environnement de la commande)
+configure
+
+#####
+## VARIABLES
+###
+
+read -d '' USAGE << EOF
+Utilisation : ${PROGRAM} [OPTIONS] exemple|autre [ARGUMENTS...]
+
+Description courte
+
+Options : 
+  Pas encore pour le moment
+
+Commandes : 
+  exemple     Description de la commande d'exemple
+  autre       Une autre description de commande
+EOF
+read -d '' ALLOWED_COMMANDS << EOF
+help
+EOF
+
+# Transforme les options longues en courtes
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help") set -- "$@" "-h" ;;
+    *)        set -- "$@" "$arg"
+  esac
+done
+# Parse short options
+while getopts "h" option; do
+    case "${option}" in
+        *|h)
+            usage+exit
+            ;;
+    esac
+done
+shift "$((OPTIND-1))"
+
+# Gestion de BASH_ARGV
+source "${DIR}/utils/argv.sh"
+
+#####
+## DÉBUT
+###
+
+#---------------------------------#
+# Placez ici vos traitements      #
+#---------------------------------#
+
+#####
+## FIN
+###
+exit 0
+# vim: ts=2 sw=2 et nu

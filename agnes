@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+#
+# agnes: 'wrapper' pour gérer les tâches quotidiennes autour d'un projet
+#
+
+#####
+## LICENSE/LICENCE
+###
+
+# Trognon - Un 'wrapper' de commandes personnalisées pour vos projets de DEV
+#
+# Copyright © 2019-2023  Olivier DOSSMANN (https://github.com/blankoworld)
+#
+# This file is part of Trognon. This software is licensed under the
+# European Union Public License 1.2 (EUPL-1.2), published in Official Journal
+# of the European Union (OJ) of 19 May 2017 and available in 23 official
+# languages of the European Union.
+#
+# The English version is included with this software. Please see the following
+# page for all the official versions of the EUPL-1.2:
+#
+# <https://joinup.ec.europa.eu/collection/eupl/eupl-text-eupl-12>
+
+DIR=$(cd `dirname $0` && pwd)
+PROGRAM=`basename $0 .sh`
+
+# Pour définir un alias : `alias monAlias="ALIAS=monAlias ${HOME}/rep/agnes"`
+PROGRAM_NAME="${PROGRAM}"
+if [[ -n "${ALIAS}" ]]; then
+  PROGRAM_NAME="${ALIAS}"
+fi
+
+# Import de fonctions utiles
+source "${DIR}/utils/common.sh" || exit 1
+
+#####
+## VARIABLES
+###
+
+# Description de l'utilisation
+read -d '' USAGE << EOF
+Utilisation : ${PROGRAM_NAME} [OPTIONS] COMMANDE [COMMANDE_ARGUMENTS...]
+
+Un 'wrapper' autour du projet ${PROJECT}
+
+Options : 
+  Pas encore disponible
+
+Commandes : 
+  convert     (*) Transforme une PR en fichier de config. pour générer une instance
+  dump        (*) Créé une sauvegarde de la base de données
+  help        Montre ce message d'aide
+  install     (*) Installe un environnement complet (dev, ci, prod, etc.)
+  restore     (*) Restaure une sauvegarde depuis un fichier
+  run         (*) Lance une commande dans l'environnement dans le projet
+  start       (*) Démarrage du serveur du projet
+  stop        (*) Arrête le serveur du projet
+  test        (*) Exécute les tests
+
+(*) Pas encore implémenté
+($) Implémenté partiellement
+EOF
+
+# TODO: Ajouter/modifier les commandes autorisées
+read -d '' ALLOWED_COMMANDS << EOF
+convert
+dump
+help
+install
+restore
+run
+start
+stop
+test
+EOF
+
+#####
+## TESTS
+###
+
+# Transforme les options longues en courtes
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help") set -- "$@" "-h" ;;
+    *)        set -- "$@" "$arg"
+  esac
+done
+# Parse short options
+while getopts "h" option; do
+    case "${option}" in
+        *|h)
+            usage+exit
+            ;;
+    esac
+done
+shift "$((OPTIND-1))"
+
+# Gestion des arguments avec BASH_ARGV
+source "${DIR}/utils/argv.sh"
+
+#####
+## DÉBUT
+###
+
+# recherche du script
+script="${DIR}/${COMMAND}.sh"
+[[ ! -f "${script}" ]] && error+usage "Script inexistant : ${script}"
+# lancement de la commande
+bash -c "${DIR}/${COMMAND}.sh ${ARGS}"
+
+#####
+## FIN
+###
+
+exit 0
+# vim: ts=2 sw=2 et nu

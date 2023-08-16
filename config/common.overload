@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+#
+# common.overload: Configuration commune surchargée
+#
+
+# Surcharge par les variables d'environnement, sinon on garde les valeurs
+# précédentes : soit celle par défaut, soit celles du fichier de configuration
+# choisi précédemment (dans project_config).
+BASE="${TROGNON_BASE:=${BASE}}"
+
+# Liste des variables du programme à sauver
+TO_SAVE_VARIABLES=(BASE)

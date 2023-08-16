@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#
+# common.default: Configuration commune par défaut
+#
+
+# Valeurs par défaut
+BASE="${HOME}/nomDuProjet" # TODO: mettre le nom du projet ici
+
