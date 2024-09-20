@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 #
-# common.sh: fonctions habituellements utilisées pour les scripts BASH 
+# common.bash: fonctions habituellements utilisées pour les scripts BASH 
 #
+
+source "${DIR}/lib/utils/common.bash" || exit 1
 
 #####
 ## LICENSE/LICENCE
@@ -30,10 +32,6 @@ PROJECT="nomDuProjet"
 COMMON_CONFIG_NAME="common"
 # Pour les couleurs
 NC='\033[0m'                    # Couleur par défaut
-INFO_COLOR='\033[7;49;34m'      # Gras + blanc + couleur de fond bleu
-SUCCESS_COLOR='\033[7;49;32m'   # Gras + blanc + couleur de fond vert
-WARNING_COLOR='\033[7;49;33m'   # Gras + blanc + couleur de fond jaune/orange
-ERROR_COLOR='\033[7;49;31m'     # Gras + blanc + couleur de fond rouge
 NORMAL_COLOR='\033[1;49;34m'    # Gras + cyan + couleur de fond 'normal'
 # Pour les commandes lancées
 ALLOWED_COMMANDS=false
@@ -41,68 +39,6 @@ ALLOWED_COMMANDS=false
 #####
 ## FONCTIONS
 ###
-
-# Messages avec des couleurs, comme les arc-en-ciel :-)
-# Cf. https://misc.flogisoft.com/bash/tip_colors_and_formatting
-colored_msg() {
-  # $1: couleur choisie
-  # $2: titre
-  # $3: le message
-  echo -e "${1}[${2}]: ${3}${NC}" 1>&2
-}
-# Message normal
-msg() {
-  echo -e "${NORMAL_COLOR}${1}${NC}" 1>&2
-}
-# Message d'information, plus prononcé
-info_msg() {
-  colored_msg "${INFO_COLOR}" "INFO" "${1}"
-}
-# Porter l'attention sur une information importante
-warning_msg() {
-  colored_msg "${WARNING_COLOR}" "IMPORTANT" "${1}"
-}
-# Erreur ç_ç
-error_msg() {
-  colored_msg "${ERROR_COLOR}" "ERREUR" "${1}"
-}
-# Réussite !
-success_msg() {
-  colored_msg "${SUCCESS_COLOR}" "SUCCÈS" "${1}"
-}
-# Échec, j'arrête le programme !
-error_msg+exit() {
-  error_msg "${1}" && exit 1
-}
-# Message pour DEBUG en temps de développement
-debug_msg() {
-  if [[ ${DEBUG} == true ]]; then
-    msg "$1"
-  fi
-}
-
-# Aide contextuelle par défaut
-usage() {
-  if [[ -n "${USAGE}" ]]; then
-    msg "${USAGE}"
-  else
-    msg "Utilisation : $PROGRAM"
-    msg "\nATTENTION : Les options et commandes pour ce programme n'a pas encore été implémenté !"
-  fi
-}
-
-# Affichage de l'aide contextuelle avant arrêt du programme !
-usage+exit() {
-  usage
-  exit 1
-}
-
-# Affichage de l'aide contextuelle, d'une erreur, puis arrêt du programme !
-error+usage() {
-  usage
-  error_msg "$1"
-  exit 1
-}
 
 # Teste la commande donnée en la comparant aux commandes autorisées
 is_command_allowed() {
@@ -112,7 +48,7 @@ is_command_allowed() {
   fi
   grep -F -q -x "$1" <<< "${ALLOWED_COMMANDS}" \
     && debug_msg "${PROGRAM}\n- Commande : $1${args_text}" \
-    || error+usage "Commande '$1' inconnue"
+    || err_msg_and_exit "Commande '$1' inconnue"
 }
 
 # Port aléatoire
@@ -155,7 +91,7 @@ project_config() {
 # On charge un fichier de configuration donné en argument 1.
 load_config() {
   if [[ -z "$1" ]]; then
-    error_msg+exit "LOAD CONFIG ❯ No file given!"
+    err_msg_and_exit "LOAD CONFIG ❯ No file given!"
   fi
   if test -f "$1"; then
     source "$1" || exit 1
@@ -202,38 +138,6 @@ save_config() {
   fi
 }
 
-# Vérification de la présence d'un programme dans le système
-# argument 1 : variable d'export qui définit le chemin du programme à utiliser
-# argument 2 : nom exact du programme
-check_program_present() {
-  message="Commande '$2' non trouvée !"
-  # préparation de la commande qui sera lancée
-  # à l'exception de nvm qui est une fonction
-  if [[ "$2" == "nvm" ]]; then
-    export_content="$2"
-  else
-    export_content=`which $2` || error_msg+exit "${message}"
-  fi
-  # vérification de la présence de notre commande
-  if test -n $(command -v $2 &> /dev/null); then
-    export $1="${export_content}"
-  else
-    error_msg+exit "${message}"
-  fi
-}
-
-# Récupération par git d'une branche d'un dépôt
-# 1 : raison de la récupération
-# 2 : URL du dépot
-# 3 : branche
-# 4 : dossier de destination
-git_clone() {
-  info_msg "$1 ❯ Récupération de  : $2 dans $4"
-  $GIT clone --depth=1 --single-branch --branch "$3" "$2" "$4" \
-  || error_msg+exit "$1 ❯ Récupération échouée !"
-  success_msg "$1 ❯ récupéré !"
-}
-
 # Installation d'une version de Python dans un dossier
 # 1 : version de python
 # 2 : dossier d'installation
@@ -273,7 +177,7 @@ check_docker_present() {
   check_program_present "DOCKER" "docker"
   $DOCKER info &> /dev/null \
     && success_msg "DOCKER : présent et lancé !" \
-    || error_msg+exit "DOCKER : manquant ! Vérifiez qu'il soit présent et lancé."
+    || err_msg_and_exit "DOCKER : manquant ! Vérifiez qu'il soit présent et lancé."
 }
 
 # Vérification de la commande docker-compose
@@ -286,11 +190,11 @@ check_docker_compose_present() {
 check_pipenv_present() {
   check_program_present "PIPENV" "pipenv"
   if [[ -z "${PIPENV_VERSION}" ]]; then
-    error_msg+exit "Variable PIPENV_VERSION non renseignée!"
+    err_msg_and_exit "Variable PIPENV_VERSION non renseignée!"
   fi
   local local_pipenv_version=`${PIPENV} --version| cut -d ' ' -f3`
   if ! test $local_pipenv_version == "${PIPENV_VERSION}"; then
-    error_msg+exit "PIPENV ${local_pipenv_version} : mauvaise version. Utilisez ${PIPENV_VERSION} ! Faites : pip install --user pipenv==${PIPENV_VERSION}"
+    err_msg_and_exit "PIPENV ${local_pipenv_version} : mauvaise version. Utilisez ${PIPENV_VERSION} ! Faites : pip install --user pipenv==${PIPENV_VERSION}"
   fi
 }
 

@@ -27,7 +27,7 @@
 ###
 
 # On a besoin d'une commande!
-[ $# -eq 0 ] && usage+exit
+[ $# -eq 0 ] && usage_and_exit
 
 #####
 ## VARIABLES 
@@ -46,6 +46,6 @@ ARGS="$@"
 is_command_allowed "${COMMAND}" "${ARGS}"
 # La commande help n'affiche que l'aide contextuelle
 if [[ "${COMMAND}" == "help" ]]; then
-  usage+exit
+  usage_and_exit
 fi
 # vim: ts=2 sw=2 et nu

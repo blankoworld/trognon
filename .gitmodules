@@ -1,0 +1,3 @@
+[submodule "lib/utils"]
+	path = lib/utils
+	url = https://gitlab.com/blankoworld/bshell-utils.git

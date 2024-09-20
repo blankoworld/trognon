@@ -15,6 +15,15 @@ Exemple :
 ./agnes dump
 ```
 
+# Dépendances
+
+Ce projet nécessite des bibliothèques supplémentaires pour fonctionner.
+Avec la commande `git` procédez ainsi&nbsp;: 
+
+```bash
+git submodule update --quiet --init --recursive 
+```
+
 # Fonctionnalités
 
 * possibilité d'ajouter ses propres commandes
@@ -33,6 +42,7 @@ Vous pouvez désormais lancer votre commande de cette façon : `./agnes install`
 
 # Rendre la commande disponible dans tout le système
 
+1. vérifiez d'avoir complété le programme avec la commande `git submodule update --quiet --init --recursive `
 1. placez ce dépôt à un endroit phare de votre système, par exemple dans **${HOME}/trognon**
 1. ajoutez la ligne suivante dans ~/.bashrc ou bien ~/.zshrc : 
 

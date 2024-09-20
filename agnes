@@ -31,7 +31,7 @@ if [[ -n "${ALIAS}" ]]; then
 fi
 
 # Import de fonctions utiles
-source "${DIR}/utils/common.sh" || exit 1
+source "${DIR}/lib/common.bash" || exit 1
 
 #####
 ## VARIABLES
@@ -90,14 +90,14 @@ done
 while getopts "h" option; do
     case "${option}" in
         *|h)
-            usage+exit
+            usage_and_exit
             ;;
     esac
 done
 shift "$((OPTIND-1))"
 
 # Gestion des arguments avec BASH_ARGV
-source "${DIR}/utils/argv.sh"
+source "${DIR}/lib/argv.bash" || exit 1
 
 #####
 ## DÉBUT
@@ -105,7 +105,7 @@ source "${DIR}/utils/argv.sh"
 
 # recherche du script
 script="${DIR}/${COMMAND}.sh"
-[[ ! -f "${script}" ]] && error+usage "Script inexistant : ${script}"
+[[ ! -f "${script}" ]] && err_msg_and_exit "Script inexistant : ${script}"
 # lancement de la commande
 bash -c "${DIR}/${COMMAND}.sh ${ARGS}"
 
