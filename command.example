@@ -7,7 +7,6 @@ DIR=$(cd `dirname $0` && pwd)
 PROGRAM=`basename $0 .sh`
 
 # Import des fonctions utiles
-source "${DIR}/lib/utils/common.bash" || exit 1
 source "${DIR}/lib/common.bash" || exit 1
 
 # Configuration (chargement des variables d'environnement de la commande)
