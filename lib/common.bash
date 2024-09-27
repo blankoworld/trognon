@@ -34,7 +34,7 @@ COMMON_CONFIG_NAME="common"
 NC='\033[0m'                    # Couleur par défaut
 NORMAL_COLOR='\033[1;49;34m'    # Gras + cyan + couleur de fond 'normal'
 # Pour les commandes lancées
-ALLOWED_COMMANDS=false
+ALLOWED_COMMANDS="${ALLOWED_COMMANDS:-false}"
 
 #####
 ## FONCTIONS
